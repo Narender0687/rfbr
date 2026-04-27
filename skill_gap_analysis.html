@@ -54,6 +54,9 @@ main{flex:1;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:
 .btn-ghost:hover{background:rgba(79,142,247,0.18)}
 .btn-danger{background:rgba(247,97,122,0.12);border:1px solid rgba(247,97,122,0.3);color:var(--red)}
 .btn-danger:hover{background:rgba(247,97,122,0.2)}
+.btn-success{background:var(--green);color:#0b2e20;font-weight:800}
+.btn-success:hover{opacity:0.88}
+.btn-big{padding:0.85rem 2rem;font-size:1rem;border-radius:12px}
 .btn:disabled{opacity:0.45;cursor:not-allowed}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.85rem}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem}
@@ -90,11 +93,30 @@ main{flex:1;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:
 .ai-txt.idle{color:var(--muted);font-style:italic}
 .welcome{margin:auto;text-align:center;opacity:0.45;padding:3rem 0}
 .welcome .icon{font-size:44px;display:block;margin-bottom:0.85rem}
+
+/* ── EMAIL SETTINGS STYLES ── */
+.setup-card{background:var(--card);border:1.5px solid rgba(124,92,252,0.3);border-radius:14px;padding:1.5rem}
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:0.85rem}
+.config-ok{display:flex;align-items:center;gap:0.6rem;background:rgba(45,212,160,0.1);border:1px solid rgba(45,212,160,0.25);border-radius:9px;padding:0.65rem 0.9rem;font-size:0.82rem;color:var(--green);margin-bottom:0.85rem}
+.send-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.to-badge{background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.25);border-radius:8px;padding:0.5rem 1rem;font-size:0.85rem;font-family:var(--mono);color:var(--accent)}
+.send-status{width:100%;border-radius:10px;padding:0.9rem 1rem;text-align:center;font-size:0.9rem;font-weight:700;display:none}
+.send-status.sending{display:block;background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);color:var(--accent)}
+.send-status.success{display:block;background:rgba(45,212,160,0.1);border:1px solid rgba(45,212,160,0.3);color:var(--green)}
+.send-status.error{display:block;background:rgba(247,97,122,0.1);border:1px solid rgba(247,97,122,0.3);color:var(--red)}
+.log-entry{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;border-radius:8px;background:rgba(45,212,160,0.05);border:1px solid rgba(45,212,160,0.15);margin-bottom:0.5rem;font-size:0.8rem}
+.log-time{font-family:var(--mono);color:var(--muted);font-size:0.72rem;white-space:nowrap}
+.help-step{display:flex;gap:0.85rem;align-items:flex-start;margin-bottom:1rem}
+.help-num{width:24px;height:24px;border-radius:50%;background:rgba(124,92,252,0.2);border:1px solid rgba(124,92,252,0.35);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:var(--accent2);flex-shrink:0;margin-top:1px}
+.help-text{font-size:0.82rem;line-height:1.6;color:var(--muted)}
+.help-text strong{color:var(--text)}
+.help-text code{font-family:var(--mono);background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:4px;font-size:0.8rem;color:var(--accent)}
+
 @media(max-width:680px){
   .page{flex-direction:column}
   aside{width:100%;border-right:none;border-bottom:1px solid var(--border)}
   main{padding:1.25rem}
-  .form-grid{grid-template-columns:1fr}
+  .form-grid,.setup-row{grid-template-columns:1fr}
   .subj-row{grid-template-columns:1fr 1fr;gap:0.5rem}
 }
 </style>
@@ -104,16 +126,17 @@ main{flex:1;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:
   <div class="logo">📊</div>
   <div>
     <h1>Skill Gap Analyser</h1>
-    <p>Marks entry · Pass/Fail · HOD alerts</p>
+    <p>Marks entry · Pass/Fail · One-click HOD alerts</p>
   </div>
 </header>
 <div class="page">
   <aside id="sidebar">
     <div>
       <div class="sl">Menu</div>
-      <button class="nav-btn active" id="nav-entry" onclick="showPage('entry')"><span style="font-size:15px">✏️</span> Enter marks</button>
-      <button class="nav-btn" id="nav-results" onclick="showPage('results')"><span style="font-size:15px">📋</span> View results</button>
-      <button class="nav-btn" id="nav-email" onclick="showPage('email')"><span style="font-size:15px">📧</span> Send HOD alert</button>
+      <button class="nav-btn active" id="nav-entry"    onclick="showPage('entry')">   <span style="font-size:15px">✏️</span> Enter marks</button>
+      <button class="nav-btn"        id="nav-results"  onclick="showPage('results')"> <span style="font-size:15px">📋</span> View results</button>
+      <button class="nav-btn"        id="nav-email"    onclick="showPage('email')">   <span style="font-size:15px">📧</span> HOD alert</button>
+      <button class="nav-btn"        id="nav-settings" onclick="showPage('settings')"><span style="font-size:15px">⚙️</span> Email settings</button>
     </div>
     <hr class="div"/>
     <div>
@@ -128,20 +151,34 @@ main{flex:1;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:
     </div>
     <hr class="div"/>
     <div>
+      <div class="sl">Search</div>
+      <input type="text" id="search-input" placeholder="Search student..."
+        style="width:100%;padding:0.5rem 0.7rem;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font-size:0.8rem;outline:none"
+        oninput="renderSidebar()"/>
+    </div>
+    <hr class="div"/>
+    <div>
       <div class="sl">Students</div>
       <div id="student-list" style="display:flex;flex-direction:column;gap:0.4rem"></div>
     </div>
   </aside>
   <main id="main"></main>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+/* ── STATE ── */
 let passThreshold = 40;
 let students = [];
 let activeStudent = null;
 let chartInst = null;
 let subjects = [{name:'Python',max:100,got:''},{name:'DSA',max:100,got:''},{name:'DBMS',max:100,got:''}];
+let emailLog = [];
+let ejsConfig = { serviceId:'', templateId:'', publicKey:'', hodEmail:'', senderName:'Skill Gap System' };
+function configSaved(){ return ejsConfig.serviceId && ejsConfig.templateId && ejsConfig.publicKey && ejsConfig.hodEmail; }
 
+/* ── THRESHOLD ── */
 function updateThresh(v){
   passThreshold = parseInt(v);
   document.getElementById('thresh-lbl').textContent = v + '%';
@@ -149,33 +186,52 @@ function updateThresh(v){
   if(ti) ti.textContent = v + '%';
 }
 
+/* ── PAGE ROUTER ── */
 function showPage(page){
-  ['entry','results','email'].forEach(p => {
+  ['entry','results','email','settings'].forEach(p => {
     const b = document.getElementById('nav-'+p);
     if(b) b.classList.toggle('active', p===page);
   });
   if(chartInst){chartInst.destroy();chartInst=null;}
   if(page==='entry') renderEntry();
   else if(page==='results') renderResults();
-  else renderEmailPage();
+  else if(page==='email') renderEmailPage();
+  else renderSettings();
 }
 
+/* ── SIDEBAR ── */
 function renderSidebar(){
   const el = document.getElementById('student-list');
   el.innerHTML = '';
   const cls = ['av1','av2','av3'];
-  students.forEach((s,i)=>{
+  const query = document.getElementById('search-input')?.value?.toLowerCase() || '';
+  const filtered = students.filter(s =>
+    s.name.toLowerCase().includes(query) ||
+    (s.roll && s.roll.toLowerCase().includes(query))
+  );
+  if(!filtered.length){
+    el.innerHTML = `<div style="font-size:0.75rem;color:var(--muted);padding:0.4rem">No students found</div>`;
+    return;
+  }
+  filtered.forEach((s,i)=>{
     const btn = document.createElement('button');
     btn.className = 'nav-btn'+(activeStudent===s.name?' active':'');
-    btn.onclick = ()=>{activeStudent=s.name;showPage('results');};
+    btn.onclick = ()=>{ activeStudent=s.name; showPage('results'); };
     const init = s.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const fails = s.subjects.filter(x=>x.status==='fail').length;
-    btn.innerHTML = `<div class="av ${cls[i%3]}">${init}</div><div style="min-width:0;flex:1"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${s.name}</div><div style="font-size:0.68rem;color:${fails>0?'var(--red)':'var(--muted)'}">${s.subjects.length} subjects${fails>0?' · '+fails+' fail':''}</div></div>`;
+    btn.innerHTML = `
+      <div class="av ${cls[i%3]}">${init}</div>
+      <div style="min-width:0;flex:1">
+        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${s.name}</div>
+        <div style="font-size:0.68rem;color:${fails>0?'var(--red)':'var(--muted)'}">
+          ${s.subjects.length} subjects${fails>0?' · '+fails+' fail':''}
+        </div>
+      </div>`;
     el.appendChild(btn);
   });
 }
 
-/* ── ENTRY ── */
+/* ── ENTRY PAGE ── */
 function renderEntry(){
   const m = document.getElementById('main');
   const existing = activeStudent ? students.find(s=>s.name===activeStudent) : null;
@@ -217,7 +273,7 @@ function renderEntry(){
       <div id="subj-list"></div>
       <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--muted)">
         Pass threshold: <span style="color:var(--amber);font-family:var(--mono)" id="thresh-inline">${passThreshold}%</span>
-        &nbsp;·&nbsp; Low: 40–60% &nbsp;·&nbsp; Fail: below threshold
+        &nbsp;·&nbsp; Low: ${passThreshold}–60% &nbsp;·&nbsp; Fail: below threshold
       </div>
     </div>
     <div style="display:flex;gap:0.75rem;align-items:center">
@@ -235,8 +291,8 @@ function renderSubjectList(){
   el.innerHTML = subjects.map((s,i)=>{
     let bc = '';
     if(s.got!==''&&!isNaN(s.got)){
-      const p = (s.got/s.max)*100;
-      bc = p < passThreshold ? 'border-color:rgba(247,97,122,0.55)' : p < 60 ? 'border-color:rgba(247,194,97,0.5)' : 'border-color:rgba(45,212,160,0.45)';
+      const p=(s.got/s.max)*100;
+      bc = p<passThreshold?'border-color:rgba(247,97,122,0.55)':p<60?'border-color:rgba(247,194,97,0.5)':'border-color:rgba(45,212,160,0.45)';
     }
     return `<div class="subj-row">
       <input type="text" placeholder="Subject name" value="${s.name}" oninput="subjects[${i}].name=this.value"/>
@@ -251,11 +307,10 @@ function updateGot(i,val,input){
   const v = val==='' ? '' : parseInt(val);
   subjects[i].got = v;
   if(v!==''&&!isNaN(v)){
-    const p = (v/subjects[i].max)*100;
+    const p=(v/subjects[i].max)*100;
     input.style.borderColor = p<passThreshold?'rgba(247,97,122,0.55)':p<60?'rgba(247,194,97,0.5)':'rgba(45,212,160,0.45)';
-  } else { input.style.borderColor=''; }
+  } else input.style.borderColor='';
 }
-
 function addSubject(){subjects.push({name:'',max:100,got:''});renderSubjectList();}
 function removeSubject(i){if(subjects.length===1)return;subjects.splice(i,1);renderSubjectList();}
 function clearForm(){subjects=[{name:'',max:100,got:''},{name:'',max:100,got:''}];activeStudent=null;renderEntry();}
@@ -284,7 +339,7 @@ function analyseStudent(){
   showPage('results');
 }
 
-/* ── RESULTS ── */
+/* ── RESULTS PAGE ── */
 function renderResults(){
   const m = document.getElementById('main');
   if(!students.length){
@@ -309,7 +364,7 @@ function renderResults(){
       </div>
       <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
         <button class="btn btn-outline" style="font-size:0.78rem;padding:0.45rem 0.9rem" onclick="loadForEdit('${s.name}')">✏️ Edit marks</button>
-        ${needsAlert?`<button class="btn btn-danger" style="font-size:0.78rem;padding:0.45rem 0.9rem" onclick="showPage('email')">📧 Alert HOD</button>`:''}
+        ${needsAlert?`<button class="btn btn-danger" style="font-size:0.78rem;padding:0.45rem 0.9rem" onclick="activeStudent='${s.name}';showPage('email')">📧 Alert HOD</button>`:''}
       </div>
     </div>
 
@@ -352,7 +407,7 @@ function renderResults(){
         <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:var(--amber);display:inline-block"></span>Low (${passThreshold}–60%)</span>
         <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:var(--red);display:inline-block"></span>Fail (<${passThreshold}%)</span>
       </div>
-      <div style="position:relative;height:220px"><canvas id="markChart" role="img" aria-label="Bar chart of marks percentage per subject for ${s.name}">Marks percentage per subject.</canvas></div>
+      <div style="position:relative;height:220px"><canvas id="markChart"></canvas></div>
     </div>
 
     <div class="ai-card">
@@ -379,26 +434,16 @@ function renderResults(){
           </tr>`;}).join('')}
         </tbody>
       </table>
-    </div>`:''} 
+    </div>`:``}
   `;
 
   if(chartInst){chartInst.destroy();chartInst=null;}
   const ctx=document.getElementById('markChart');
-  if(ctx){
-    chartInst=new Chart(ctx,{
-      type:'bar',
-      data:{labels:s.subjects.map(x=>x.name),datasets:[{
-        label:'%',data:s.subjects.map(x=>x.pct),
-        backgroundColor:s.subjects.map(x=>x.status==='fail'?'#f7617a':x.status==='low'?'#f7c261':'#2dd4a0'),
-        borderRadius:5
-      }]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{
-          x:{ticks:{color:'#7a8299',font:{family:'Syne'}},grid:{color:'rgba(255,255,255,0.04)'}},
-          y:{min:0,max:100,ticks:{color:'#7a8299',callback:v=>v+'%',stepSize:20},grid:{color:'rgba(255,255,255,0.05)'}}
-        }}
-    });
-  }
+  if(ctx) chartInst=new Chart(ctx,{
+    type:'bar',
+    data:{labels:s.subjects.map(x=>x.name),datasets:[{label:'%',data:s.subjects.map(x=>x.pct),backgroundColor:s.subjects.map(x=>x.status==='fail'?'#f7617a':x.status==='low'?'#f7c261':'#2dd4a0'),borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7a8299',font:{family:'Syne'}},grid:{color:'rgba(255,255,255,0.04)'}},y:{min:0,max:100,ticks:{color:'#7a8299',callback:v=>v+'%',stepSize:20},grid:{color:'rgba(255,255,255,0.05)'}}}}
+  });
 }
 
 function loadForEdit(name){
@@ -410,48 +455,40 @@ function loadForEdit(name){
 }
 
 async function getAI(name){
-  const btn=document.getElementById('ai-btn'),
-        txt=document.getElementById('ai-txt');
-
+  const btn=document.getElementById('ai-btn'), txt=document.getElementById('ai-txt');
   if(!btn||!txt) return;
-
-  btn.disabled=true;
-  txt.className='ai-txt idle';
-  txt.textContent='Analysing marks…';
-
+  btn.disabled=true; txt.className='ai-txt idle'; txt.textContent='Analysing marks…';
   const s=students.find(x=>x.name===name);
-
   try{
     const res=await fetch("http://127.0.0.1:5000/generate-tips",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        subjects: s.subjects   // ✅ dynamic
-      })
+      body:JSON.stringify({ subjects: s.subjects })
     });
-
     const data=await res.json();
-    console.log("API Response:",data);
-
     txt.className='ai-txt';
-
-    if(data.success && data.recommendations){
-      txt.innerHTML=data.recommendations;
-    } else {
-      txt.textContent="⚠️ No response";
-    }
-
-    btn.textContent='✦ Regenerate →';
-    btn.disabled=false;
-
+    if(data.success && data.recommendations) txt.innerHTML=data.recommendations;
+    else txt.textContent="⚠️ No response from server.";
+    btn.textContent='✦ Regenerate →'; btn.disabled=false;
   }catch(e){
-    txt.className='ai-txt';
-    txt.textContent='❌ Server error';
-    btn.disabled=false;
+    txt.className='ai-txt'; txt.textContent='❌ Could not reach AI server. Make sure Flask is running.'; btn.disabled=false;
   }
 }
 
-/* ── EMAIL ── */
+/* ── HOD ALERT PAGE — ONE CLICK ── */
+function buildEmailBody(s){
+  const tg=s.subjects.reduce((a,x)=>a+x.got,0);
+  const tm=s.subjects.reduce((a,x)=>a+x.max,0);
+  const overall=Math.round((tg/tm)*100);
+  const fails=s.subjects.filter(x=>x.status==='fail');
+  const lows=s.subjects.filter(x=>x.status==='low');
+  const rows=s.subjects.map(x=>`${x.name.padEnd(20)}${String(x.got).padStart(4)} / ${x.max}   ${x.pct}%   [${x.status.toUpperCase()}]`).join('\n');
+  return {
+    subject:`⚠️ Performance Alert — ${s.name}${s.dept?' ('+s.dept+')':''}`,
+    body:`Dear HOD,\n\nThis is an automated performance alert from the Skill Gap Analysis System.\n\n─────────────────────────────\nSTUDENT DETAILS\n─────────────────────────────\nName        : ${s.name}\nRoll No.    : ${s.roll||'N/A'}\nDepartment  : ${s.dept||'N/A'}\nSemester    : ${s.sem?'Semester '+s.sem:'N/A'}\nOverall %   : ${overall}%  (${tg}/${tm} marks)\n\n─────────────────────────────\nSUBJECT-WISE PERFORMANCE\n─────────────────────────────\n${rows}\n\n─────────────────────────────\nALERT SUMMARY\n─────────────────────────────\n${fails.length>0?'FAILED subjects (below '+passThreshold+'%): '+fails.map(x=>x.name).join(', '):''}\n${lows.length>0?'LOW performance subjects (below 60%): '+lows.map(x=>x.name).join(', '):''}\n\nPlease take necessary academic action at the earliest.\n\nRegards,\n${ejsConfig.senderName}`
+  };
+}
+
 function renderEmailPage(){
   const m=document.getElementById('main');
   if(!students.length){
@@ -460,107 +497,193 @@ function renderEmailPage(){
   }
   const alertStudents=students.filter(s=>s.subjects.some(x=>x.status==='fail'||x.status==='low'));
   if(!alertStudents.length){
-    m.innerHTML=`<div class="welcome"><span class="icon">✅</span><div style="font-size:1rem;font-weight:700;margin-bottom:0.35rem">No alerts needed</div><p style="font-size:0.85rem">All students have satisfactory performance.</p></div>`;
+    m.innerHTML=`<div class="welcome"><span class="icon">✅</span><div style="font-size:1rem;font-weight:700;margin-bottom:0.35rem">All clear!</div><p style="font-size:0.85rem">All students have satisfactory performance.</p></div>`;
     return;
   }
   const s=alertStudents.find(x=>x.name===activeStudent)||alertStudents[0];
-  const fails=s.subjects.filter(x=>x.status==='fail');
-  const lows=s.subjects.filter(x=>x.status==='low');
-  const tg=s.subjects.reduce((a,x)=>a+x.got,0),tm=s.subjects.reduce((a,x)=>a+x.max,0);
-  const overall=Math.round((tg/tm)*100);
-  const subTable=s.subjects.map(x=>`  ${x.name.padEnd(20)}${String(x.got).padStart(4)} / ${x.max}  →  ${x.pct}%  [${x.status.toUpperCase()}]`).join('\n');
-  const body=`Dear HOD,
-
-This is an automated performance alert from the Skill Gap Analysis System.
-
-─────────────────────────────────────
-STUDENT DETAILS
-─────────────────────────────────────
-Name        : ${s.name}
-Roll No.    : ${s.roll||'N/A'}
-Department  : ${s.dept||'N/A'}
-Semester    : ${s.sem?'Semester '+s.sem:'N/A'}
-Overall %   : ${overall}%  (${tg}/${tm} marks)
-
-─────────────────────────────────────
-SUBJECT-WISE PERFORMANCE
-─────────────────────────────────────
-${subTable}
-
-─────────────────────────────────────
-ALERT SUMMARY
-─────────────────────────────────────
-${fails.length>0?`FAILED subjects (below ${passThreshold}%): ${fails.map(x=>x.name).join(', ')}`:''}
-${lows.length>0?`LOW performance subjects (below 60%): ${lows.map(x=>x.name).join(', ')}`:''}
-
-Please take necessary academic action at the earliest.
-
-Regards,
-Skill Gap Analysis System`;
+  activeStudent=s.name;
+  const configured=configSaved();
 
   m.innerHTML=`
     <div>
-      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px">HOD alert email</div>
+      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px">HOD alert — one click</div>
       <div style="font-size:0.78rem;color:var(--muted)">Auto-generated from student performance data</div>
     </div>
 
+    ${!configured
+      ? `<div class="alert alert-warn"><span class="alert-icon">⚙️</span><div class="alert-body"><strong style="color:var(--amber)">Email not configured.</strong> Go to <button onclick="showPage('settings')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-weight:700;font-size:0.83rem;text-decoration:underline">⚙️ Email settings</button> first to set up EmailJS and HOD email address.</div></div>`
+      : `<div class="config-ok"><span style="font-size:15px">✅</span> Sending to HOD: <strong style="font-family:var(--mono)">${ejsConfig.hodEmail}</strong></div>`
+    }
+
     ${alertStudents.length>1?`
     <div class="card">
-      <div class="sec">Students needing alert</div>
+      <div class="sec">Select student to alert</div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-        ${alertStudents.map(st=>`<button class="btn ${st.name===s.name?'btn-primary':'btn-outline'}" style="font-size:0.78rem;padding:0.4rem 0.85rem" onclick="activeStudent='${st.name}';renderEmailPage()">${st.name}${students.find(x=>x.name===st.name).subjects.filter(x=>x.status==='fail').length>0?' 🚨':' ⚠️'}</button>`).join('')}
+        ${alertStudents.map(st=>`<button class="btn ${st.name===s.name?'btn-primary':'btn-outline'}" style="font-size:0.78rem;padding:0.4rem 0.85rem" onclick="activeStudent='${st.name}';renderEmailPage()">${st.name} ${st.subjects.filter(x=>x.status==='fail').length>0?'🚨':'⚠️'}</button>`).join('')}
       </div>
-    </div>`:``}
+    </div>`:''}
 
-    <div class="modal-bg">
-      <div class="modal">
-        <h3>Compose HOD email — ${s.name}</h3>
-        <div class="ef"><label>From (sender)</label><input type="email" id="e-from" value="system@college.edu"/></div>
-        <div class="ef"><label>To — HOD email *</label><input type="email" id="e-to" placeholder="hod@college.edu"/></div>
-        <div class="ef"><label>CC (optional)</label><input type="email" id="e-cc" placeholder="principal@college.edu"/></div>
-        <div class="ef"><label>Subject</label><input type="text" id="e-subj" value="⚠️ Performance Alert — ${s.name} (${s.dept||'Dept'})"/></div>
-        <div class="ef"><label>Email body (editable)</label><textarea id="e-body" rows="12" style="font-family:var(--mono);font-size:0.77rem;line-height:1.6">${body}</textarea></div>
-        <div id="email-status" style="min-height:1.2rem;font-size:0.82rem;margin-bottom:0.65rem"></div>
-        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
-          <button class="btn btn-primary" id="send-btn" onclick="sendEmail()">📧 Send email</button>
-          <button class="btn btn-outline" onclick="copyEmail()">📋 Copy</button>
-          <button class="btn btn-outline" onclick="openMailto()">↗ Mail app</button>
-        </div>
-        <div style="margin-top:0.85rem;font-size:0.7rem;color:var(--muted);line-height:1.5">
-          Note: Real email delivery requires backend SMTP setup (Gmail App Password / SendGrid etc.).<br/>
-          Use "Mail app" to open in your email client, or "Copy" to paste manually.
-        </div>
+    <div class="send-box">
+      <div style="font-size:0.78rem;color:var(--muted)">Sending alert for</div>
+      <div style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em">${s.name}</div>
+      <div style="font-size:0.78rem;color:var(--muted)">to HOD at</div>
+      <div class="to-badge">${configured?ejsConfig.hodEmail:'Not configured — go to ⚙️ Email settings'}</div>
+      <div style="font-size:0.78rem;color:var(--muted);max-width:340px;text-align:center">
+        The email includes full subject-wise marks, percentage, pass/fail status and alert summary — auto-generated.
       </div>
+      <button class="btn btn-success btn-big" id="one-click-btn" onclick="oneClickSend('${s.name}')" ${!configured?'disabled':''}>
+        📧 Send HOD alert now
+      </button>
+      <div class="send-status" id="send-status"></div>
     </div>
+
+    ${emailLog.length>0?`
+    <div class="card">
+      <div class="sec">Sent log</div>
+      ${[...emailLog].reverse().map(l=>`
+        <div class="log-entry">
+          <span style="font-size:15px">${l.ok?'✅':'❌'}</span>
+          <div style="flex:1"><strong>${l.student}</strong> → ${l.to}</div>
+          <span class="log-time">${l.time}</span>
+        </div>`).join('')}
+    </div>`:''}
   `;
 }
 
-function sendEmail(){
-  const to=document.getElementById('e-to')?.value?.trim();
-  const st=document.getElementById('email-status');
-  const btn=document.getElementById('send-btn');
-  if(!to){st.style.color='var(--red)';st.textContent='⚠ Please enter HOD email address.';return;}
-  btn.disabled=true; st.style.color='var(--muted)'; st.textContent='Sending…';
-  setTimeout(()=>{
+async function oneClickSend(name){
+  const btn=document.getElementById('one-click-btn');
+  const status=document.getElementById('send-status');
+  if(!btn||!status) return;
+  const s=students.find(x=>x.name===name);
+  if(!s) return;
+  btn.disabled=true;
+  status.className='send-status sending';
+  status.textContent='Sending email…';
+  const {subject,body}=buildEmailBody(s);
+  try{
+    emailjs.init(ejsConfig.publicKey);
+    await emailjs.send(ejsConfig.serviceId, ejsConfig.templateId, {
+      to_email:   ejsConfig.hodEmail,
+      from_name:  ejsConfig.senderName,
+      subject:    subject,
+      message:    body,
+      student_name: s.name,
+      reply_to:   ejsConfig.hodEmail
+    });
+    status.className='send-status success';
+    status.textContent='✅ Email sent to HOD successfully!';
+    emailLog.push({student:name, to:ejsConfig.hodEmail, time:new Date().toLocaleTimeString(), ok:true});
+    btn.textContent='📧 Send again'; btn.disabled=false;
+    setTimeout(()=>renderEmailPage(), 2000);
+  }catch(err){
+    status.className='send-status error';
+    status.textContent='❌ Failed: '+(err?.text||err?.message||'Check EmailJS settings.');
+    emailLog.push({student:name, to:ejsConfig.hodEmail, time:new Date().toLocaleTimeString(), ok:false});
+    btn.textContent='📧 Retry'; btn.disabled=false;
+  }
+}
+
+/* ── EMAIL SETTINGS PAGE ── */
+function renderSettings(){
+  const m=document.getElementById('main');
+  m.innerHTML=`
+    <div>
+      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px">⚙️ Email settings</div>
+      <div style="font-size:0.78rem;color:var(--muted)">Configure EmailJS once — then send HOD alerts with one click forever</div>
+    </div>
+
+    <div class="setup-card">
+      <div style="font-size:0.95rem;font-weight:800;margin-bottom:0.4rem">How to get your credentials (free)</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1.25rem">Go to <a href="https://www.emailjs.com" target="_blank" style="color:var(--accent)">emailjs.com</a> → sign up free → follow steps below</div>
+
+      <div class="help-step">
+        <div class="help-num">1</div>
+        <div class="help-text"><strong>Email Services</strong> → Add New Service → Gmail → connect account → copy <code>Service ID</code></div>
+      </div>
+      <div class="help-step">
+        <div class="help-num">2</div>
+        <div class="help-text"><strong>Email Templates</strong> → Create New → set To: <code>{{to_email}}</code>, Subject: <code>{{subject}}</code>, Body: <code>{{message}}</code> → Save → copy <code>Template ID</code></div>
+      </div>
+      <div class="help-step">
+        <div class="help-num">3</div>
+        <div class="help-text"><strong>Account → General</strong> → copy <code>Public Key</code></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0"/>
+
+      <div class="setup-row">
+        <div class="fg"><label>EmailJS Service ID *</label><input type="text" id="cfg-service" placeholder="service_xxxxxxx" value="${ejsConfig.serviceId}"/></div>
+        <div class="fg"><label>EmailJS Template ID *</label><input type="text" id="cfg-template" placeholder="template_xxxxxxx" value="${ejsConfig.templateId}"/></div>
+      </div>
+      <div class="setup-row">
+        <div class="fg"><label>EmailJS Public Key *</label><input type="text" id="cfg-pubkey" placeholder="xxxxxxxxxxxxxxxxxxxx" value="${ejsConfig.publicKey}"/></div>
+        <div class="fg"><label>Sender name</label><input type="text" id="cfg-sender" placeholder="Skill Gap System" value="${ejsConfig.senderName}"/></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0"/>
+
+      <div class="fg" style="margin-bottom:1.25rem;max-width:380px">
+        <label style="font-size:0.9rem;font-weight:700;color:var(--text)">🎯 HOD email address (fixed recipient)</label>
+        <input type="email" id="cfg-hod" placeholder="hod@college.edu" value="${ejsConfig.hodEmail}" style="margin-top:0.45rem"/>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:5px">Every alert will go to this address automatically — no manual typing needed.</div>
+      </div>
+
+      <div id="cfg-status" style="min-height:1.2rem;font-size:0.82rem;margin-bottom:0.85rem"></div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveConfig()">💾 Save configuration</button>
+        <button class="btn btn-outline" onclick="testEmail()">🧪 Send test email</button>
+      </div>
+    </div>
+
+    ${configSaved()?`
+    <div class="alert alert-ok">
+      <span class="alert-icon">✅</span>
+      <div class="alert-body"><strong style="color:var(--green)">Configuration saved!</strong> HOD email: <span style="font-family:var(--mono)">${ejsConfig.hodEmail}</span>. Go to <button onclick="showPage('email')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-weight:700;font-size:0.83rem;text-decoration:underline">📧 HOD alert</button> to send with one click.</div>
+    </div>`:''}
+  `;
+}
+
+function saveConfig(){
+  const svc  = document.getElementById('cfg-service')?.value?.trim();
+  const tpl  = document.getElementById('cfg-template')?.value?.trim();
+  const key  = document.getElementById('cfg-pubkey')?.value?.trim();
+  const hod  = document.getElementById('cfg-hod')?.value?.trim();
+  const sndr = document.getElementById('cfg-sender')?.value?.trim();
+  const st   = document.getElementById('cfg-status');
+  if(!svc||!tpl||!key||!hod){
+    st.style.color='var(--red)';
+    st.textContent='⚠ Please fill in Service ID, Template ID, Public Key and HOD email.';
+    return;
+  }
+  ejsConfig = {serviceId:svc, templateId:tpl, publicKey:key, hodEmail:hod, senderName:sndr||'Skill Gap System'};
+  st.style.color='var(--green)';
+  st.textContent='✅ Configuration saved! You can now send one-click alerts.';
+  setTimeout(()=>renderSettings(), 800);
+}
+
+async function testEmail(){
+  const st=document.getElementById('cfg-status');
+  if(!configSaved()){st.style.color='var(--red)';st.textContent='⚠ Save configuration first.';return;}
+  const btn=document.querySelector('[onclick="testEmail()"]');
+  if(btn) btn.disabled=true;
+  st.style.color='var(--muted)'; st.textContent='Sending test email…';
+  try{
+    emailjs.init(ejsConfig.publicKey);
+    await emailjs.send(ejsConfig.serviceId, ejsConfig.templateId, {
+      to_email:    ejsConfig.hodEmail,
+      from_name:   ejsConfig.senderName,
+      subject:     '✅ Test — Skill Gap Analysis System',
+      message:     `This is a test email from the Skill Gap Analysis System.\n\nYour EmailJS configuration is working correctly!\nHOD alerts will be delivered to this address automatically.\n\nRegards,\n${ejsConfig.senderName}`,
+      student_name:'Test',
+      reply_to:    ejsConfig.hodEmail
+    });
     st.style.color='var(--green)';
-    st.textContent='✅ Email sent to HOD! (simulation — connect SMTP backend to send real emails)';
-    btn.disabled=false;
-  },1400);
-}
-function copyEmail(){
-  const body=document.getElementById('e-body')?.value;
-  if(!body) return;
-  navigator.clipboard.writeText(body).then(()=>{
-    const s=document.getElementById('email-status');
-    s.style.color='var(--green)'; s.textContent='✅ Copied to clipboard!';
-  });
-}
-function openMailto(){
-  const to=document.getElementById('e-to')?.value||'';
-  const cc=document.getElementById('e-cc')?.value||'';
-  const subj=encodeURIComponent(document.getElementById('e-subj')?.value||'');
-  const body=encodeURIComponent(document.getElementById('e-body')?.value||'');
-  window.open(`mailto:${to}?cc=${cc}&subject=${subj}&body=${body}`);
+    st.textContent='✅ Test email sent to '+ejsConfig.hodEmail+'!';
+  }catch(err){
+    st.style.color='var(--red)';
+    st.textContent='❌ Failed: '+(err?.text||err?.message||'Check your Service ID, Template ID and Public Key.');
+  }
+  if(btn) btn.disabled=false;
 }
 
 /* ── INIT ── */
