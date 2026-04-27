@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Skill Gap Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#131826;--card:#182030;--border:rgba(255,255,255,0.08);
+  --accent:#4f8ef7;--accent2:#7c5cfc;--green:#2dd4a0;--red:#f7617a;--amber:#f7c261;
+  --text:#e8eaf0;--muted:#7a8299;
+  --font:'Syne',sans-serif;--mono:'DM Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+input,select,textarea,button{font-family:var(--font)}
+header{padding:1.1rem 2rem;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:0.9rem}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+header h1{font-size:1.15rem;font-weight:800;letter-spacing:-0.02em}
+header p{font-size:0.75rem;color:var(--muted);margin-top:1px}
+.page{display:flex;min-height:calc(100vh - 62px)}
+aside{width:252px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 0.9rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto}
+.sl{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);padding:0 0.4rem;margin-bottom:0.25rem}
+.nav-btn{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.8rem;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--text);font-size:0.85rem;font-weight:500;cursor:pointer;width:100%;text-align:left;transition:background 0.15s,border-color 0.15s}
+.nav-btn:hover{background:var(--card)}
+.nav-btn.active{background:var(--card);border-color:var(--accent)}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.av1{background:rgba(79,142,247,0.2);color:var(--accent)}
+.av2{background:rgba(124,92,252,0.2);color:var(--accent2)}
+.av3{background:rgba(45,212,160,0.2);color:var(--green)}
+hr.div{border:none;border-top:1px solid var(--border);margin:0.25rem 0}
+main{flex:1;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.75rem}
+.sec{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:0.65rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.card-title{font-size:0.95rem;font-weight:700;margin-bottom:1rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem}
+.fg{display:flex;flex-direction:column;gap:0.35rem}
+.fg label{font-size:0.75rem;color:var(--muted)}
+.fg input,.fg select{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--text);font-size:0.88rem;outline:none;transition:border-color 0.15s}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.fg select option{background:#1a2236}
+.subj-row{display:grid;grid-template-columns:1.5fr 0.9fr 0.9fr auto;gap:0.6rem;align-items:end;margin-bottom:0.6rem}
+.subj-row input{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;color:var(--text);font-size:0.85rem;outline:none;transition:border-color 0.15s;width:100%}
+.subj-row input:focus{border-color:var(--accent)}
+.del-btn{background:rgba(247,97,122,0.1);border:1px solid rgba(247,97,122,0.22);border-radius:8px;color:var(--red);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;transition:background 0.15s}
+.del-btn:hover{background:rgba(247,97,122,0.2)}
+.btn{padding:0.6rem 1.2rem;border-radius:9px;font-size:0.85rem;font-weight:700;cursor:pointer;transition:opacity 0.15s,background 0.15s;border:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{opacity:0.88}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{background:var(--card)}
+.btn-ghost{background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);color:var(--accent)}
+.btn-ghost:hover{background:rgba(79,142,247,0.18)}
+.btn-danger{background:rgba(247,97,122,0.12);border:1px solid rgba(247,97,122,0.3);color:var(--red)}
+.btn-danger:hover{background:rgba(247,97,122,0.2)}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.85rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem}
+.stat-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem}
+.stat-val{font-size:1.6rem;font-weight:800;font-family:var(--mono)}
+.stat-sub{font-size:0.7rem;color:var(--muted);margin-top:2px}
+.c-green{color:var(--green)}.c-red{color:var(--red)}.c-amber{color:var(--amber)}.c-blue{color:var(--accent)}
+.result-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.result-table th{text-align:left;padding:0.5rem 0.75rem;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);border-bottom:1px solid var(--border)}
+.result-table td{padding:0.65rem 0.75rem;border-bottom:1px solid rgba(255,255,255,0.04)}
+.result-table tr:last-child td{border-bottom:none}
+.badge{font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:99px;font-family:var(--mono);white-space:nowrap}
+.badge-pass{background:rgba(45,212,160,0.12);color:var(--green);border:1px solid rgba(45,212,160,0.25)}
+.badge-fail{background:rgba(247,97,122,0.12);color:var(--red);border:1px solid rgba(247,97,122,0.25)}
+.badge-low{background:rgba(247,194,97,0.12);color:var(--amber);border:1px solid rgba(247,194,97,0.25)}
+.prog-wrap{height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.prog-bar{height:100%;border-radius:99px;transition:width 0.4s}
+.alert{display:flex;gap:0.75rem;border-radius:10px;padding:0.9rem 1rem}
+.alert-warn{background:rgba(247,194,97,0.1);border:1px solid rgba(247,194,97,0.25)}
+.alert-err{background:rgba(247,97,122,0.1);border:1px solid rgba(247,97,122,0.25)}
+.alert-ok{background:rgba(45,212,160,0.08);border:1px solid rgba(45,212,160,0.22)}
+.alert-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.alert-body{font-size:0.83rem;line-height:1.55}
+.modal-bg{background:rgba(0,0,0,0.5);border-radius:12px;padding:2rem;display:flex;align-items:center;justify-content:center;min-height:420px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.75rem;width:100%;max-width:540px}
+.modal h3{font-size:1rem;font-weight:800;margin-bottom:1.25rem}
+.ef{margin-bottom:0.85rem}
+.ef label{font-size:0.72rem;color:var(--muted);display:block;margin-bottom:0.3rem}
+.ef input,.ef textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.85rem;color:var(--text);font-size:0.85rem;outline:none;resize:none}
+.ef input:focus,.ef textarea:focus{border-color:var(--accent)}
+.ai-card{background:rgba(124,92,252,0.06);border:1px solid rgba(124,92,252,0.22);border-radius:12px;padding:1.25rem}
+.ai-hdr{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);font-weight:700;margin-bottom:0.65rem}
+.ai-txt{font-size:0.87rem;line-height:1.65;color:var(--text)}
+.ai-txt.idle{color:var(--muted);font-style:italic}
+.welcome{margin:auto;text-align:center;opacity:0.45;padding:3rem 0}
+.welcome .icon{font-size:44px;display:block;margin-bottom:0.85rem}
+@media(max-width:680px){
+  .page{flex-direction:column}
+  aside{width:100%;border-right:none;border-bottom:1px solid var(--border)}
+  main{padding:1.25rem}
+  .form-grid{grid-template-columns:1fr}
+  .subj-row{grid-template-columns:1fr 1fr;gap:0.5rem}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">📊</div>
+  <div>
+    <h1>Skill Gap Analyser</h1>
+    <p>Marks entry · Pass/Fail · HOD alerts</p>
+  </div>
+</header>
+<div class="page">
+  <aside id="sidebar">
+    <div>
+      <div class="sl">Menu</div>
+      <button class="nav-btn active" id="nav-entry" onclick="showPage('entry')"><span style="font-size:15px">✏️</span> Enter marks</button>
+      <button class="nav-btn" id="nav-results" onclick="showPage('results')"><span style="font-size:15px">📋</span> View results</button>
+      <button class="nav-btn" id="nav-email" onclick="showPage('email')"><span style="font-size:15px">📧</span> Send HOD alert</button>
+    </div>
+    <hr class="div"/>
+    <div>
+      <div class="sl">Pass threshold</div>
+      <div style="padding:0 0.4rem">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:4px">
+          <input type="range" id="pass-thresh" min="30" max="60" step="5" value="40" style="flex:1;accent-color:var(--accent)" oninput="updateThresh(this.value)"/>
+          <span style="font-size:0.8rem;font-family:var(--mono);color:var(--accent);min-width:32px" id="thresh-lbl">40%</span>
+        </div>
+        <div style="font-size:0.68rem;color:var(--muted)">Alert HOD if student scores below this</div>
+      </div>
+    </div>
+    <hr class="div"/>
+    <div>
+      <div class="sl">Students</div>
+      <div id="student-list" style="display:flex;flex-direction:column;gap:0.4rem"></div>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let passThreshold = 40;
+let students = [];
+let activeStudent = null;
+let chartInst = null;
+let subjects = [{name:'Python',max:100,got:''},{name:'DSA',max:100,got:''},{name:'DBMS',max:100,got:''}];
+
+function updateThresh(v){
+  passThreshold = parseInt(v);
+  document.getElementById('thresh-lbl').textContent = v + '%';
+  const ti = document.getElementById('thresh-inline');
+  if(ti) ti.textContent = v + '%';
+}
+
+function showPage(page){
+  ['entry','results','email'].forEach(p => {
+    const b = document.getElementById('nav-'+p);
+    if(b) b.classList.toggle('active', p===page);
+  });
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  if(page==='entry') renderEntry();
+  else if(page==='results') renderResults();
+  else renderEmailPage();
+}
+
+function renderSidebar(){
+  const el = document.getElementById('student-list');
+  el.innerHTML = '';
+  const cls = ['av1','av2','av3'];
+  students.forEach((s,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn'+(activeStudent===s.name?' active':'');
+    btn.onclick = ()=>{activeStudent=s.name;showPage('results');};
+    const init = s.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const fails = s.subjects.filter(x=>x.status==='fail').length;
+    btn.innerHTML = `<div class="av ${cls[i%3]}">${init}</div><div style="min-width:0;flex:1"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px">${s.name}</div><div style="font-size:0.68rem;color:${fails>0?'var(--red)':'var(--muted)'}">${s.subjects.length} subjects${fails>0?' · '+fails+' fail':''}</div></div>`;
+    el.appendChild(btn);
+  });
+}
+
+/* ── ENTRY ── */
+function renderEntry(){
+  const m = document.getElementById('main');
+  const existing = activeStudent ? students.find(s=>s.name===activeStudent) : null;
+  m.innerHTML = `
+    <div>
+      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px">Enter student marks</div>
+      <div style="font-size:0.78rem;color:var(--muted)">Fill in student details and subject-wise marks obtained</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Student information</div>
+      <div class="form-grid">
+        <div class="fg"><label>Student name *</label><input type="text" id="s-name" placeholder="e.g. Ravi Kumar" value="${existing?existing.name:''}"/></div>
+        <div class="fg"><label>Roll number</label><input type="text" id="s-roll" placeholder="e.g. 22CS001" value="${existing?existing.roll:''}"/></div>
+        <div class="fg"><label>Department</label>
+          <select id="s-dept">
+            <option value="">Select department</option>
+            ${['Computer Science','Electronics','Mechanical','Civil','Other'].map(d=>`<option${existing&&existing.dept===d?' selected':''}>${d}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label>Semester</label>
+          <select id="s-sem">
+            <option value="">Select semester</option>
+            ${[1,2,3,4,5,6,7,8].map(n=>`<option${existing&&existing.sem==n?' selected':''}>${n}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div class="card-title" style="margin-bottom:0">Subject marks</div>
+        <button class="btn btn-ghost" onclick="addSubject()" style="font-size:0.78rem;padding:0.4rem 0.85rem">+ Add subject</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1.5fr 0.9fr 0.9fr auto;gap:0.5rem 0.6rem;margin-bottom:0.5rem">
+        <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Subject name</div>
+        <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Max marks</div>
+        <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Marks obtained</div>
+        <div></div>
+      </div>
+      <div id="subj-list"></div>
+      <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--muted)">
+        Pass threshold: <span style="color:var(--amber);font-family:var(--mono)" id="thresh-inline">${passThreshold}%</span>
+        &nbsp;·&nbsp; Low: 40–60% &nbsp;·&nbsp; Fail: below threshold
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <button class="btn btn-primary" onclick="analyseStudent()">Analyse student →</button>
+      <button class="btn btn-outline" onclick="clearForm()">Clear</button>
+    </div>
+    <div id="entry-err" style="font-size:0.82rem;color:var(--red);margin-top:-1.2rem"></div>
+  `;
+  renderSubjectList();
+}
+
+function renderSubjectList(){
+  const el = document.getElementById('subj-list');
+  if(!el) return;
+  el.innerHTML = subjects.map((s,i)=>{
+    let bc = '';
+    if(s.got!==''&&!isNaN(s.got)){
+      const p = (s.got/s.max)*100;
+      bc = p < passThreshold ? 'border-color:rgba(247,97,122,0.55)' : p < 60 ? 'border-color:rgba(247,194,97,0.5)' : 'border-color:rgba(45,212,160,0.45)';
+    }
+    return `<div class="subj-row">
+      <input type="text" placeholder="Subject name" value="${s.name}" oninput="subjects[${i}].name=this.value"/>
+      <input type="number" placeholder="100" min="1" max="999" value="${s.max}" oninput="subjects[${i}].max=parseInt(this.value)||100"/>
+      <input type="number" placeholder="marks" min="0" value="${s.got===''?'':s.got}" style="${bc}" oninput="updateGot(${i},this.value,this)"/>
+      <div class="del-btn" onclick="removeSubject(${i})" title="Remove">✕</div>
+    </div>`;
+  }).join('');
+}
+
+function updateGot(i,val,input){
+  const v = val==='' ? '' : parseInt(val);
+  subjects[i].got = v;
+  if(v!==''&&!isNaN(v)){
+    const p = (v/subjects[i].max)*100;
+    input.style.borderColor = p<passThreshold?'rgba(247,97,122,0.55)':p<60?'rgba(247,194,97,0.5)':'rgba(45,212,160,0.45)';
+  } else { input.style.borderColor=''; }
+}
+
+function addSubject(){subjects.push({name:'',max:100,got:''});renderSubjectList();}
+function removeSubject(i){if(subjects.length===1)return;subjects.splice(i,1);renderSubjectList();}
+function clearForm(){subjects=[{name:'',max:100,got:''},{name:'',max:100,got:''}];activeStudent=null;renderEntry();}
+
+function analyseStudent(){
+  const name = document.getElementById('s-name')?.value?.trim();
+  const roll = document.getElementById('s-roll')?.value?.trim();
+  const dept = document.getElementById('s-dept')?.value;
+  const sem  = document.getElementById('s-sem')?.value;
+  const errEl = document.getElementById('entry-err');
+  if(!name){errEl.textContent='⚠ Please enter a student name.';return;}
+  const filled = subjects.filter(s=>s.name&&s.got!==''&&!isNaN(s.got));
+  if(!filled.length){errEl.textContent='⚠ Add at least one subject with marks.';return;}
+  const bad = filled.find(s=>s.got>s.max||s.got<0);
+  if(bad){errEl.textContent=`⚠ "${bad.name}": marks cannot exceed max or be negative.`;return;}
+  const computed = filled.map(s=>{
+    const pct = Math.round((s.got/s.max)*100);
+    const status = pct<passThreshold?'fail':pct<60?'low':'pass';
+    return {...s, pct, status};
+  });
+  const rec = {name,roll,dept,sem,subjects:computed};
+  const idx = students.findIndex(s=>s.name===name);
+  if(idx>=0) students[idx]=rec; else students.push(rec);
+  activeStudent = name;
+  renderSidebar();
+  showPage('results');
+}
+
+/* ── RESULTS ── */
+function renderResults(){
+  const m = document.getElementById('main');
+  if(!students.length){
+    m.innerHTML=`<div class="welcome"><span class="icon">📋</span><div style="font-size:1rem;font-weight:700;margin-bottom:0.35rem">No data yet</div><p style="font-size:0.85rem">Enter student marks to begin.</p><button class="btn btn-primary" style="margin-top:1rem" onclick="showPage('entry')">Enter marks →</button></div>`;
+    return;
+  }
+  const s = students.find(x=>x.name===activeStudent)||students[students.length-1];
+  if(!s) return;
+  const tg=s.subjects.reduce((a,x)=>a+x.got,0);
+  const tm=s.subjects.reduce((a,x)=>a+x.max,0);
+  const overall=Math.round((tg/tm)*100);
+  const fails=s.subjects.filter(x=>x.status==='fail');
+  const lows=s.subjects.filter(x=>x.status==='low');
+  const passes=s.subjects.filter(x=>x.status==='pass');
+  const needsAlert=fails.length>0||lows.length>0;
+
+  m.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.75rem">
+      <div>
+        <div style="font-size:1.4rem;font-weight:800;letter-spacing:-0.03em">${s.name}</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:3px">${[s.roll,s.dept,s.sem?'Sem '+s.sem:''].filter(Boolean).join(' · ')||'No additional info'}</div>
+      </div>
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+        <button class="btn btn-outline" style="font-size:0.78rem;padding:0.45rem 0.9rem" onclick="loadForEdit('${s.name}')">✏️ Edit marks</button>
+        ${needsAlert?`<button class="btn btn-danger" style="font-size:0.78rem;padding:0.45rem 0.9rem" onclick="showPage('email')">📧 Alert HOD</button>`:''}
+      </div>
+    </div>
+
+    ${fails.length>0?`<div class="alert alert-err"><span class="alert-icon">🚨</span><div class="alert-body"><strong style="color:var(--red)">FAIL — ${fails.length} subject${fails.length>1?'s':''} below ${passThreshold}%:</strong> ${fails.map(x=>x.name).join(', ')}. Immediate HOD notification recommended.</div></div>`:''}
+    ${lows.length>0?`<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><strong style="color:var(--amber)">Low performance — ${lows.length} subject${lows.length>1?'s':''} between ${passThreshold}%–60%:</strong> ${lows.map(x=>x.name).join(', ')}.</div></div>`:''}
+    ${!needsAlert?`<div class="alert alert-ok"><span class="alert-icon">✅</span><div class="alert-body" style="color:var(--green)">All subjects passed satisfactorily. No HOD alert required.</div></div>`:''}
+
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-lbl">Overall %</div><div class="stat-val ${overall<passThreshold?'c-red':overall<60?'c-amber':'c-green'}">${overall}%</div><div class="stat-sub">${tg} / ${tm} total marks</div></div>
+      <div class="stat"><div class="stat-lbl">Passed</div><div class="stat-val c-green">${passes.length}</div><div class="stat-sub">subjects ≥ 60%</div></div>
+      <div class="stat"><div class="stat-lbl">Low marks</div><div class="stat-val c-amber">${lows.length}</div><div class="stat-sub">${passThreshold}% – 60%</div></div>
+      <div class="stat"><div class="stat-lbl">Failed</div><div class="stat-val c-red">${fails.length}</div><div class="stat-sub">below ${passThreshold}%</div></div>
+    </div>
+
+    <div class="card">
+      <div class="sec">Subject-wise breakdown</div>
+      <table class="result-table">
+        <thead><tr><th>Subject</th><th>Obtained</th><th>Max</th><th>Percentage</th><th>Result</th></tr></thead>
+        <tbody>${s.subjects.map(x=>`
+          <tr>
+            <td style="font-weight:600">${x.name}</td>
+            <td style="font-family:var(--mono)">${x.got}</td>
+            <td style="font-family:var(--mono);color:var(--muted)">${x.max}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1;min-width:60px"><div class="prog-bar" style="width:${x.pct}%;background:${x.status==='fail'?'var(--red)':x.status==='low'?'var(--amber)':'var(--green)'}"></div></div>
+                <span style="font-family:var(--mono);font-size:0.82rem;min-width:38px">${x.pct}%</span>
+              </div>
+            </td>
+            <td><span class="badge badge-${x.status}">${x.status==='fail'?'FAIL':x.status==='low'?'LOW':'PASS'}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="sec">Visual chart</div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.75rem">
+        <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:var(--green);display:inline-block"></span>Pass (≥60%)</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:var(--amber);display:inline-block"></span>Low (${passThreshold}–60%)</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:var(--red);display:inline-block"></span>Fail (<${passThreshold}%)</span>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="markChart" role="img" aria-label="Bar chart of marks percentage per subject for ${s.name}">Marks percentage per subject.</canvas></div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-hdr">✦ AI recommendations</div>
+      <div class="ai-txt idle" id="ai-txt">Click to get personalised improvement suggestions for ${s.name}.</div>
+      <button class="btn btn-ghost" style="margin-top:0.75rem;font-size:0.78rem" id="ai-btn" onclick="getAI('${s.name}')">✦ Generate →</button>
+    </div>
+
+    ${students.length>1?`
+    <div class="card">
+      <div class="sec">All students overview</div>
+      <table class="result-table">
+        <thead><tr><th>Name</th><th>Subjects</th><th>Overall %</th><th>Fail</th><th>Low</th><th>Alert</th></tr></thead>
+        <tbody>${students.map(st=>{
+          const tg2=st.subjects.reduce((a,x)=>a+x.got,0),tm2=st.subjects.reduce((a,x)=>a+x.max,0);
+          const op=Math.round(tg2/tm2*100),fl=st.subjects.filter(x=>x.status==='fail').length,lw=st.subjects.filter(x=>x.status==='low').length;
+          return `<tr>
+            <td style="font-weight:600;cursor:pointer;color:var(--accent)" onclick="activeStudent='${st.name}';renderResults()">${st.name}</td>
+            <td style="font-family:var(--mono)">${st.subjects.length}</td>
+            <td><span style="font-family:var(--mono);color:${op<passThreshold?'var(--red)':op<60?'var(--amber)':'var(--green)'}">${op}%</span></td>
+            <td style="font-family:var(--mono);color:${fl>0?'var(--red)':'var(--muted)'}">${fl}</td>
+            <td style="font-family:var(--mono);color:${lw>0?'var(--amber)':'var(--muted)'}">${lw}</td>
+            <td><span class="badge ${fl>0||lw>0?'badge-fail':'badge-pass'}">${fl>0||lw>0?'YES':'NO'}</span></td>
+          </tr>`;}).join('')}
+        </tbody>
+      </table>
+    </div>`:''} 
+  `;
+
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  const ctx=document.getElementById('markChart');
+  if(ctx){
+    chartInst=new Chart(ctx,{
+      type:'bar',
+      data:{labels:s.subjects.map(x=>x.name),datasets:[{
+        label:'%',data:s.subjects.map(x=>x.pct),
+        backgroundColor:s.subjects.map(x=>x.status==='fail'?'#f7617a':x.status==='low'?'#f7c261':'#2dd4a0'),
+        borderRadius:5
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:'#7a8299',font:{family:'Syne'}},grid:{color:'rgba(255,255,255,0.04)'}},
+          y:{min:0,max:100,ticks:{color:'#7a8299',callback:v=>v+'%',stepSize:20},grid:{color:'rgba(255,255,255,0.05)'}}
+        }}
+    });
+  }
+}
+
+function loadForEdit(name){
+  const s = students.find(x=>x.name===name);
+  if(!s) return;
+  subjects = s.subjects.map(x=>({name:x.name,max:x.max,got:x.got}));
+  activeStudent = name;
+  showPage('entry');
+}
+
+async function getAI(name){
+  const btn=document.getElementById('ai-btn'),
+        txt=document.getElementById('ai-txt');
+
+  if(!btn||!txt) return;
+
+  btn.disabled=true;
+  txt.className='ai-txt idle';
+  txt.textContent='Analysing marks…';
+
+  const s=students.find(x=>x.name===name);
+
+  try{
+    const res=await fetch("http://127.0.0.1:5000/generate-tips",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        subjects: s.subjects   // ✅ dynamic
+      })
+    });
+
+    const data=await res.json();
+    console.log("API Response:",data);
+
+    txt.className='ai-txt';
+
+    if(data.success && data.recommendations){
+      txt.innerHTML=data.recommendations;
+    } else {
+      txt.textContent="⚠️ No response";
+    }
+
+    btn.textContent='✦ Regenerate →';
+    btn.disabled=false;
+
+  }catch(e){
+    txt.className='ai-txt';
+    txt.textContent='❌ Server error';
+    btn.disabled=false;
+  }
+}
+
+/* ── EMAIL ── */
+function renderEmailPage(){
+  const m=document.getElementById('main');
+  if(!students.length){
+    m.innerHTML=`<div class="welcome"><span class="icon">📧</span><div style="font-size:1rem;font-weight:700;margin-bottom:0.35rem">No data yet</div><p style="font-size:0.85rem">Enter marks first.</p><button class="btn btn-primary" style="margin-top:1rem" onclick="showPage('entry')">Enter marks →</button></div>`;
+    return;
+  }
+  const alertStudents=students.filter(s=>s.subjects.some(x=>x.status==='fail'||x.status==='low'));
+  if(!alertStudents.length){
+    m.innerHTML=`<div class="welcome"><span class="icon">✅</span><div style="font-size:1rem;font-weight:700;margin-bottom:0.35rem">No alerts needed</div><p style="font-size:0.85rem">All students have satisfactory performance.</p></div>`;
+    return;
+  }
+  const s=alertStudents.find(x=>x.name===activeStudent)||alertStudents[0];
+  const fails=s.subjects.filter(x=>x.status==='fail');
+  const lows=s.subjects.filter(x=>x.status==='low');
+  const tg=s.subjects.reduce((a,x)=>a+x.got,0),tm=s.subjects.reduce((a,x)=>a+x.max,0);
+  const overall=Math.round((tg/tm)*100);
+  const subTable=s.subjects.map(x=>`  ${x.name.padEnd(20)}${String(x.got).padStart(4)} / ${x.max}  →  ${x.pct}%  [${x.status.toUpperCase()}]`).join('\n');
+  const body=`Dear HOD,
+
+This is an automated performance alert from the Skill Gap Analysis System.
+
+─────────────────────────────────────
+STUDENT DETAILS
+─────────────────────────────────────
+Name        : ${s.name}
+Roll No.    : ${s.roll||'N/A'}
+Department  : ${s.dept||'N/A'}
+Semester    : ${s.sem?'Semester '+s.sem:'N/A'}
+Overall %   : ${overall}%  (${tg}/${tm} marks)
+
+─────────────────────────────────────
+SUBJECT-WISE PERFORMANCE
+─────────────────────────────────────
+${subTable}
+
+─────────────────────────────────────
+ALERT SUMMARY
+─────────────────────────────────────
+${fails.length>0?`FAILED subjects (below ${passThreshold}%): ${fails.map(x=>x.name).join(', ')}`:''}
+${lows.length>0?`LOW performance subjects (below 60%): ${lows.map(x=>x.name).join(', ')}`:''}
+
+Please take necessary academic action at the earliest.
+
+Regards,
+Skill Gap Analysis System`;
+
+  m.innerHTML=`
+    <div>
+      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px">HOD alert email</div>
+      <div style="font-size:0.78rem;color:var(--muted)">Auto-generated from student performance data</div>
+    </div>
+
+    ${alertStudents.length>1?`
+    <div class="card">
+      <div class="sec">Students needing alert</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+        ${alertStudents.map(st=>`<button class="btn ${st.name===s.name?'btn-primary':'btn-outline'}" style="font-size:0.78rem;padding:0.4rem 0.85rem" onclick="activeStudent='${st.name}';renderEmailPage()">${st.name}${students.find(x=>x.name===st.name).subjects.filter(x=>x.status==='fail').length>0?' 🚨':' ⚠️'}</button>`).join('')}
+      </div>
+    </div>`:``}
+
+    <div class="modal-bg">
+      <div class="modal">
+        <h3>Compose HOD email — ${s.name}</h3>
+        <div class="ef"><label>From (sender)</label><input type="email" id="e-from" value="system@college.edu"/></div>
+        <div class="ef"><label>To — HOD email *</label><input type="email" id="e-to" placeholder="hod@college.edu"/></div>
+        <div class="ef"><label>CC (optional)</label><input type="email" id="e-cc" placeholder="principal@college.edu"/></div>
+        <div class="ef"><label>Subject</label><input type="text" id="e-subj" value="⚠️ Performance Alert — ${s.name} (${s.dept||'Dept'})"/></div>
+        <div class="ef"><label>Email body (editable)</label><textarea id="e-body" rows="12" style="font-family:var(--mono);font-size:0.77rem;line-height:1.6">${body}</textarea></div>
+        <div id="email-status" style="min-height:1.2rem;font-size:0.82rem;margin-bottom:0.65rem"></div>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+          <button class="btn btn-primary" id="send-btn" onclick="sendEmail()">📧 Send email</button>
+          <button class="btn btn-outline" onclick="copyEmail()">📋 Copy</button>
+          <button class="btn btn-outline" onclick="openMailto()">↗ Mail app</button>
+        </div>
+        <div style="margin-top:0.85rem;font-size:0.7rem;color:var(--muted);line-height:1.5">
+          Note: Real email delivery requires backend SMTP setup (Gmail App Password / SendGrid etc.).<br/>
+          Use "Mail app" to open in your email client, or "Copy" to paste manually.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function sendEmail(){
+  const to=document.getElementById('e-to')?.value?.trim();
+  const st=document.getElementById('email-status');
+  const btn=document.getElementById('send-btn');
+  if(!to){st.style.color='var(--red)';st.textContent='⚠ Please enter HOD email address.';return;}
+  btn.disabled=true; st.style.color='var(--muted)'; st.textContent='Sending…';
+  setTimeout(()=>{
+    st.style.color='var(--green)';
+    st.textContent='✅ Email sent to HOD! (simulation — connect SMTP backend to send real emails)';
+    btn.disabled=false;
+  },1400);
+}
+function copyEmail(){
+  const body=document.getElementById('e-body')?.value;
+  if(!body) return;
+  navigator.clipboard.writeText(body).then(()=>{
+    const s=document.getElementById('email-status');
+    s.style.color='var(--green)'; s.textContent='✅ Copied to clipboard!';
+  });
+}
+function openMailto(){
+  const to=document.getElementById('e-to')?.value||'';
+  const cc=document.getElementById('e-cc')?.value||'';
+  const subj=encodeURIComponent(document.getElementById('e-subj')?.value||'');
+  const body=encodeURIComponent(document.getElementById('e-body')?.value||'');
+  window.open(`mailto:${to}?cc=${cc}&subject=${subj}&body=${body}`);
+}
+
+/* ── INIT ── */
+renderEntry();
+</script>
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Gap Analysis Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --card: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #f0ede6;
+    --muted: #8a8a9a;
+    --accent: #c8f560;
+    --accent-dim: rgba(200,245,96,0.12);
+    --s1: #6ec6f5;
+    --s1-dim: rgba(110,198,245,0.15);
+    --s2: #f79e6e;
+    --s2-dim: rgba(247,158,110,0.15);
+    --danger: #f76e6e;
+    --warn: #f7c86e;
+    --good: #6ef79e;
+  }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Header */
+  .hero {
+    padding: 56px 48px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,245,96,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero p {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 460px;
+    line-height: 1.6;
+  }
+
+  /* Layout */
+  .main {
+    padding: 36px 48px 64px;
+    max-width: 1100px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    width: fit-content;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #0d0f14;
+  }
+  .tab-btn:hover:not(.active) {
+    color: var(--text);
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Student selector */
+  .student-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+  .student-selector span {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .stu-btn {
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .stu-btn.s1.active {
+    background: var(--s1-dim);
+    border-color: var(--s1);
+    color: var(--s1);
+  }
+  .stu-btn.s2.active {
+    background: var(--s2-dim);
+    border-color: var(--s2);
+    color: var(--s2);
+  }
+  .stu-btn:hover:not(.active) {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .scard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .scard-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .scard-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+  .scard-val.good { color: var(--good); }
+  .scard-val.warn { color: var(--warn); }
+  .scard-val.bad { color: var(--danger); }
+  .scard-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Skill bars */
+  .skill-list { display: flex; flex-direction: column; gap: 18px; }
+  .skill-row { }
+  .skill-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .skill-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .skill-vals {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 16px;
+  }
+  .skill-vals .gap-val {
+    font-weight: 500;
+  }
+  .skill-vals .gap-val.low { color: var(--good); }
+  .skill-vals .gap-val.mid { color: var(--warn); }
+  .skill-vals .gap-val.high { color: var(--danger); }
+
+  .bar-track {
+    height: 10px;
+    background: var(--surface);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+  .bar-req {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: var(--border-strong);
+    border-radius: 99px;
+  }
+  .bar-stu {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Chart container */
+  .chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 28px 20px;
+    margin-top: 32px;
+  }
+  .chart-wrap h3 {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  /* Comparison panel */
+  .comp-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--surface);
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  thead th:not(:first-child) { text-align: center; }
+  tbody td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td:not(:first-child) {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-good { background: rgba(110,247,158,0.15); color: var(--good); }
+  .badge-warn { background: rgba(247,200,110,0.15); color: var(--warn); }
+  .badge-bad { background: rgba(247,110,110,0.15); color: var(--danger); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 600px) {
+    .hero, .main { padding-left: 20px; padding-right: 20px; }
+    .hero { padding-top: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Academic Analytics</div>
+  <h1>Skill Gap<br><em>Analysis</em></h1>
+  <p>Visualizing the distance between where students are and where they need to be — across five core competencies.</p>
+</div>
+
+<div class="main">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('individual')">Individual View</button>
+    <button class="tab-btn" onclick="switchTab('comparison')">Comparison</button>
+     <a href="/skill_gap_analysis.html" class="tab-btn">Add</a>
+  </div>
+
+  <!-- INDIVIDUAL PANEL -->
+  <div id="panel-individual" class="panel active">
+    <div class="student-selector">
+      <span>Student</span>
+      <button class="stu-btn s1 active" onclick="selectStudent(1)">Student 1</button>
+      <button class="stu-btn s2" onclick="selectStudent(2)">Student 2</button>
+    </div>
+
+    <div class="summary-grid" id="summary-cards"></div>
+
+    <div class="skill-list" id="skill-bars"></div>
+
+    <div class="chart-wrap">
+      <h3>Gap Profile</h3>
+      <div style="position: relative; height: 240px;">
+        <canvas id="indChart" role="img" aria-label="Bar chart showing skill gaps per subject"></canvas>
+      </div>
+    </div>
+    <div style="margin-top:20px;">
+  <button onclick="getRecommendations()" 
+    style="padding:10px 20px; border:none; border-radius:8px; background:#c8f560; font-weight:600; cursor:pointer;">
+    Get AI Recommendations
+  </button>
+
+  <div id="ai-output" style="margin-top:15px; color:white;"></div>
+</div>
+  </div>
+
+  <!-- COMPARISON PANEL -->
+  <div id="panel-comparison" class="panel">
+    <div class="comp-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Required</th>
+            <th>S1 Level</th>
+            <th>S1 Gap</th>
+            <th>S2 Level</th>
+            <th>S2 Gap</th>
+            <th>Leader</th>
+          </tr>
+        </thead>
+        <tbody id="comp-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="chart-wrap">
+      <h3>Side-by-Side Gap Comparison</h3>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#6ec6f5;"></span>Student 1</span>
+        <span><span class="legend-dot" style="background:#f79e6e;"></span>Student 2</span>
+      </div>
+      <div style="position: relative; height: 280px;">
+        <canvas id="compChart" role="img" aria-label="Grouped bar chart comparing skill gaps for Student 1 and Student 2"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DATA = {
+  skills: ['Programming','Data Structures','Communication','Aptitude','Problem Solving'],
+  required: [80, 75, 70, 65, 80],
+  s1: [60, 50, 65, 40, 55],
+  s2: [70, 65, 60, 55, 70]
+};
+
+let currentStudent = 1;
+let indChartInst = null;
+
+function gap(req, lvl) { return req - lvl; }
+
+function gapClass(g) {
+  if (g <= 5) return 'low';
+  if (g <= 15) return 'mid';
+  return 'high';
+}
+
+function barColor(stu) {
+  return stu === 1 ? '#6ec6f5' : '#f79e6e';
+}
+
+function renderSummary(stu) {
+  const levels = stu === 1 ? DATA.s1 : DATA.s2;
+  const gaps = DATA.skills.map((_, i) => gap(DATA.required[i], levels[i]));
+  const total = gaps.reduce((a, b) => a + b, 0);
+  const avg = (total / gaps.length).toFixed(1);
+  const minG = Math.min(...gaps);
+  const maxG = Math.max(...gaps);
+  const bestIdx = gaps.indexOf(minG);
+  const weakIdx = gaps.indexOf(maxG);
+
+  const avgClass = avg <= 10 ? 'good' : avg <= 20 ? 'warn' : 'bad';
+
+  document.getElementById('summary-cards').innerHTML = `
+    <div class="scard">
+      <div class="scard-label">Avg Gap</div>
+      <div class="scard-val ${avgClass}">${avg}</div>
+      <div class="scard-sub">points below required</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">Strongest</div>
+      <div class="scard-val good" style="font-size:18px;">${DATA.skills[bestIdx]}</div>
+      <div class="scard-sub">Gap: ${minG} pts</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">Weakest</div>
+      <div class="scard-val bad" style="font-size:18px;">${DATA.skills[weakIdx]}</div>
+      <div class="scard-sub">Gap: ${maxG} pts</div>
+    </div>
+    <div class="scard">
+      <div class="scard-label">Completion</div>
+      <div class="scard-val ${avgClass}">${Math.round((levels.reduce((a,b)=>a+b,0)/DATA.required.reduce((a,b)=>a+b,0))*100)}%</div>
+      <div class="scard-sub">of required levels</div>
+    </div>
+  `;
+}
+
+function renderBars(stu) {
+  const levels = stu === 1 ? DATA.s1 : DATA.s2;
+  const color = barColor(stu);
+  let html = '';
+  DATA.skills.forEach((skill, i) => {
+    const req = DATA.required[i];
+    const lvl = levels[i];
+    const g = gap(req, lvl);
+    const gc = gapClass(g);
+    const pctReq = req;
+    const pctLvl = (lvl / 100) * 100;
+    html += `
+      <div class="skill-row">
+        <div class="skill-meta">
+          <span class="skill-name">${skill}</span>
+          <div class="skill-vals">
+            <span>${lvl} / ${req}</span>
+            <span class="gap-val ${gc}">gap: ${g}</span>
+          </div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-req" style="width:${pctReq}%"></div>
+          <div class="bar-stu" style="width:${pctLvl}%; background:${color};"></div>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('skill-bars').innerHTML = html;
+}
+
+function renderIndChart(stu) {
+  const levels = stu === 1 ? DATA.s1 : DATA.s2;
+  const gaps = DATA.skills.map((_, i) => gap(DATA.required[i], levels[i]));
+  const color = barColor(stu);
+
+  if (indChartInst) { indChartInst.destroy(); }
+
+  const minG = Math.min(...gaps);
+  const maxG = Math.max(...gaps);
+  const bgColors = gaps.map(g => {
+    if (g === minG) return '#6ef79e';
+    if (g === maxG) return '#f76e6e';
+    return color;
+  });
+
+  indChartInst = new Chart(document.getElementById('indChart'), {
+    type: 'bar',
+    data: {
+      labels: DATA.skills,
+      datasets: [{
+        label: 'Skill Gap',
+        data: gaps,
+        backgroundColor: bgColors,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` Gap: ${ctx.parsed.y} points`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#8a8a9a', font: { family: 'Syne', size: 12 }, autoSkip: false },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.08)' }
+        },
+        y: {
+          beginAtZero: true,
+          max: 40,
+          ticks: { color: '#8a8a9a', font: { family: 'DM Mono', size: 11 }, stepSize: 10 },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.08)' }
+        }
+      }
+    }
+  });
+}
+
+function selectStudent(stu) {
+  currentStudent = stu;
+  document.querySelectorAll('.stu-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.stu-btn')[stu - 1].classList.add('active');
+  renderSummary(stu);
+  renderBars(stu);
+  renderIndChart(stu);
+}
+
+let compChartInst = null;
+
+function renderComparison() {
+  const s1gaps = DATA.skills.map((_, i) => gap(DATA.required[i], DATA.s1[i]));
+  const s2gaps = DATA.skills.map((_, i) => gap(DATA.required[i], DATA.s2[i]));
+
+  let rows = '';
+  DATA.skills.forEach((skill, i) => {
+    const g1 = s1gaps[i], g2 = s2gaps[i];
+    const leader = g1 < g2 ? '<span class="badge badge-good">S1</span>' : g1 > g2 ? '<span class="badge badge-warn">S2</span>' : '<span class="badge" style="background:rgba(255,255,255,0.07);color:#8a8a9a">Tied</span>';
+    const gc1 = gapClass(g1), gc2 = gapClass(g2);
+    rows += `
+      <tr>
+        <td style="font-weight:700;">${skill}</td>
+        <td>${DATA.required[i]}</td>
+        <td>${DATA.s1[i]}</td>
+        <td><span class="badge badge-${gc1 === 'low' ? 'good' : gc1 === 'mid' ? 'warn' : 'bad'}">${g1}</span></td>
+        <td>${DATA.s2[i]}</td>
+        <td><span class="badge badge-${gc2 === 'low' ? 'good' : gc2 === 'mid' ? 'warn' : 'bad'}">${g2}</span></td>
+        <td>${leader}</td>
+      </tr>
+    `;
+  });
+  document.getElementById('comp-tbody').innerHTML = rows;
+
+  if (compChartInst) compChartInst.destroy();
+
+  compChartInst = new Chart(document.getElementById('compChart'), {
+    type: 'bar',
+    data: {
+      labels: DATA.skills,
+      datasets: [
+        {
+          label: 'Student 1',
+          data: s1gaps,
+          backgroundColor: '#6ec6f5',
+          borderRadius: 5,
+          borderSkipped: false,
+        },
+        {
+          label: 'Student 2',
+          data: s2gaps,
+          backgroundColor: '#f79e6e',
+          borderRadius: 5,
+          borderSkipped: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { color: '#8a8a9a', font: { family: 'Syne', size: 12 }, autoSkip: false, maxRotation: 30 },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.08)' }
+        },
+        y: {
+          beginAtZero: true,
+          max: 40,
+          ticks: { color: '#8a8a9a', font: { family: 'DM Mono', size: 11 }, stepSize: 10 },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.08)' }
+        }
+      }
+    }
+  });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'comparison') renderComparison();
+}
+
+selectStudent(1);
+async function getRecommendations() {
+    const data = {
+        python: 35,
+        dsa: 30,
+        dbms: 45
+    };
+
+    const response = await fetch("http://127.0.0.1:5000/generate-tips", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        document.getElementById("ai-output").innerHTML = result.recommendations;
+    } else {
+        document.getElementById("ai-output").innerText = "Error: " + result.error;
+    }
+}
+</script>
+</body>
+</html>
